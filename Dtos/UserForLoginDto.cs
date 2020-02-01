@@ -1,9 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace DatingApp.Dtos
 {
-    public class UserForRegisterDto
+    public class UserForLoginDto
     {
         [Required]
         [StringLength(maximumLength: 16, MinimumLength = 3,
