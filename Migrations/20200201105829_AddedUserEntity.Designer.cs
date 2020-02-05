@@ -35,7 +35,7 @@ namespace DatingApp.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("UsersController");
                 });
 
             modelBuilder.Entity("DatingApp.Models.Value", b =>
