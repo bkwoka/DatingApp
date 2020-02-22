@@ -4,6 +4,7 @@ using System.Security;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
 using DatingApp.Data;
 using DatingApp.Dtos;
 using DatingApp.Models;
@@ -19,12 +20,14 @@ namespace DatingApp.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IConfiguration _configuration;
+        private readonly IMapper _mapper;
         private readonly IAuthRepository _authRepository;
 
-        public AuthController(IAuthRepository authRepository, IConfiguration configuration)
+        public AuthController(IAuthRepository authRepository, IConfiguration configuration, IMapper mapper)
         {
             _authRepository = authRepository;
             _configuration = configuration;
+            _mapper = mapper;
         }
 
         [HttpPost("register")]
@@ -35,14 +38,13 @@ namespace DatingApp.Controllers
             if (await _authRepository.UserExists(userForRegisterDto.Username))
                 return BadRequest("Username already exists");
 
-            var userToCreate = new User
-            {
-                Username = userForRegisterDto.Username
-            };
+            var userToCreate = _mapper.Map<User>(userForRegisterDto);
 
             var createdUser = await _authRepository.Register(userToCreate, userForRegisterDto.Password);
 
-            return StatusCode(201); //todo FIX THIS; 
+            var userToReturn = _mapper.Map<UserForDetailedDto>(createdUser);
+
+            return CreatedAtRoute("GetUser", new {controller= "Users", id = createdUser.Id}, userToReturn);
         }
 
         [HttpPost("login")]
@@ -77,9 +79,12 @@ namespace DatingApp.Controllers
             var tokenHandler = new JwtSecurityTokenHandler();
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
+            var user = _mapper.Map<UserForListDto>(userFromRepo);
+
             return Ok(new
             {
-                token = tokenHandler.WriteToken(token)
+                token = tokenHandler.WriteToken(token),
+                user
             });
         }
     }
